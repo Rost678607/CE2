@@ -1,4 +1,8 @@
-void ce2_core_exit();
+#pragma once
 
-void ce2_core_set_tps();
-void ce2_core_get_tps();
+#include <stdint.h>
+
+void ce2_core_exit(void);
+
+void ce2_core_set_tps(uint8_t);
+uint8_t ce2_core_get_tps(void);

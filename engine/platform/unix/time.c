@@ -2,6 +2,10 @@
 #include <time.h>
 #include <unistd.h>
 
+#if defined(__x86_64__) || defined(i386) || defined(__i386__)
+    #include <immintrin.h>
+#endif
+
 void ce2_platform_time_init(void) {}
 
 uint64_t ce2_platform_time_get_ns(void) {
@@ -17,7 +21,7 @@ void ce2_platform_time_sleep_ns(uint64_t ns) {
     nanosleep(&req, NULL);
 }
 
-void ce2_platform_cpu_relax(void) {
+void ce2_platform_time_cpu_relax(void) {
     #if defined(__x86_64__) || defined(i386) || defined(__i386__)
         _mm_pause();
     #elif defined(__aarch64__) || defined(__arm__)

@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "engine/graphics/screen.h"
 #include "engine/platform/terminal.h"
 #include "engine/platform/time.h"
 
@@ -31,35 +32,38 @@ uint8_t ce2_core_get_tps() {
 int main() {
     init();
 
-    if (game_init) game_init();
+    game_init();
 
-    if (game_loop) {
-        uint64_t target_frame_ns = 0;
-        uint64_t next_frame_start = ce2_platform_time_get_ns();
+    uint64_t target_frame_ns = 0;
+    uint64_t next_frame_start = ce2_platform_time_get_ns();
 
-        while (run) {
-            next_frame_start += target_frame_ns;
-            game_loop();
-            target_frame_ns = 1000000000ULL / tps;
-            uint64_t now = ce2_platform_time_get_ns();
+    while (run) {
+        next_frame_start += target_frame_ns;
 
-            if (now < next_frame_start) {
-                uint64_t remaining = next_frame_start - now;
-                if (remaining > 2000000ULL) {
-                    ce2_platform_time_sleep_ns(remaining - 2000000ULL);
-                    now = ce2_platform_time_get_ns();
-                }
-                while (now < next_frame_start) {
-                    ce2_platform_cpu_relax(); 
-                    now = ce2_platform_time_get_ns();
-                }
-            } else {
-                if (now - next_frame_start > 1000000000ULL) {
-                    next_frame_start = now;
-                }
+        ce2_graphics_update_screen_size();
+
+        game_loop();
+
+        target_frame_ns = 1000000000ULL / tps;
+        uint64_t now = ce2_platform_time_get_ns();
+
+        if (now < next_frame_start) {
+            uint64_t remaining = next_frame_start - now;
+            if (remaining > 2000000ULL) {
+                ce2_platform_time_sleep_ns(remaining - 2000000ULL);
+                now = ce2_platform_time_get_ns();
+            }
+            while (now < next_frame_start) {
+                ce2_platform_time_cpu_relax(); 
+                now = ce2_platform_time_get_ns();
+            }
+        } else {
+            if (now - next_frame_start > 1000000000ULL) {
+                next_frame_start = now;
             }
         }
     }
+
     ce2_platform_terminal_shutdown();
     return 0;
 }
