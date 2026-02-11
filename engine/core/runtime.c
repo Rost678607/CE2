@@ -12,8 +12,8 @@ static uint8_t tps = 60;
 static bool run = true;
 
 static void init() {
-    ce2_platform_terminal_init();
     ce2_platform_time_init();
+    ce2_graphics_init();
 }
 
 void ce2_core_exit() {
@@ -40,9 +40,12 @@ int main() {
     while (run) {
         next_frame_start += target_frame_ns;
 
-        ce2_graphics_update_screen_size();
+        ce2_screen_size_update();
+        ce2_screen_buffer_clear();
 
         game_loop();
+
+        ce2_screen_render();
 
         target_frame_ns = 1000000000ULL / tps;
         uint64_t now = ce2_platform_time_get_ns();
